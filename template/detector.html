@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Detection</title>
+    <link rel="icon" type="image/png"  sizes="64x64" href='../Logo/HumanDetect (1).png'>
+    <link rel="stylesheet" href="css/styles.css">
+   
+</head>
+<body>
+    <div class="container">
+        <h1>Human Detection in Images</h1>
+        <div class="upload-area">
+            <label for="file-input">Choose an image to upload</label>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+        <div class="result" id="result">
+            <img id="uploaded-image" src="" alt="Uploaded Image">
+            <p id="result-text"></p>
+        </div>
+    </div>
+
+
+    <!-- showcase-content -->
+    <div class="showcase-content">
+        <h2 class="h2">Human Detector</h2>
+        <p class="lead p">Explore images<b> Without limitations</b></p>
+
+        <!-- Upload  -->
+        <div class="upload-div">
+          <form id="file-upload-form" class="uploader">
+            <input
+              id="file-upload"
+              type="file"
+              name="fileUpload"
+              accept="image/*"
+            />
+
+            <label for="file-upload" id="file-drag">
+              <img id="file-image" src="#" alt="Preview" class="hidden" />
+              <div id="start">
+                <i class="fa fa-download" aria-hidden="true"></i>
+                <div>Select a File or Drag here</div>
+                <div id="notimage" class="hidden">Please select an image</div>
+              </div>
+              <div id="response" class="hidden">
+                <div id="messages"></div>
+                <progress class="progress" id="file-progress" value="0">
+                  <span>0</span>%
+                </progress>
+              </div>
+            </label>
+          </form>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-div">
+          <input type="submit" class="submit" value="Submit" />
+        </div>
+      </div>
+    </main>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="JS/script.js"></script>
+    <script>
+        document.getElementById('file-input').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const imageUrl = e.target.result;
+                    const imgElement = document.getElementById('uploaded-image');
+                    imgElement.src = imageUrl;
+                    imgElement.onload = async function() {
+                        const resultDiv = document.getElementById('result');
+                        resultDiv.style.display = 'block';
+
+                        const model = await cocoSsd.load();
+                        const predictions = await model.detect(imgElement);
+
+                        const resultText = document.getElementById('result-text');
+                        const humanDetected = predictions.some(prediction => prediction.class === 'person');
+                        
+                        resultText.textContent = humanDetected ? 'Human detected' : 'No human detected';
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
